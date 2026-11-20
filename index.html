@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unit Testing in R</title>
+<meta name="description" content="A short course on writing unit tests by hand with testthat, for data science students who know some R and tidyverse.">
+<link rel="stylesheet" href="assets/course.css">
+<script src="assets/course.js" defer></script>
+</head>
+<body>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="index.html">Unit Testing in R</a>
+  <nav aria-label="Course">
+    <a href="reference/cheat-sheet.html">Cheat sheet</a>
+    <a href="reference/glossary.html">Glossary</a>
+    <a href="https://github.com/acatlin/r-unit-testing">Source on GitHub</a>
+  </nav>
+</div></header>
+
+<main class="page">
+  <p class="eyebrow">A short course · five lessons</p>
+  <h1>Unit Testing in R</h1>
+  <p class="lede">How to write down what your R functions should do, as code the computer can check, using the testthat package. For data science students who can write a function and a dplyr pipeline and have never written a test.</p>
+
+  <p>Each lesson takes 20 to 30 minutes, teaches one skill, and ends with a short quiz. You write every test by hand. The examples are the small data-cleaning helpers you already write: rescaling a column, tidying column names, parsing money, summarising by group.</p>
+
+  <h2>Lessons</h2>
+  <ol class="toc wide">
+    <li><a href="lessons/0001-first-expectation.html">
+      <span class="n">1</span>
+      <span><span class="t" data-progress="lesson-1">Your first expectation</span>
+      <span class="d">Turn a glance at the console into <code>expect_equal()</code>. Read a pass and a failure.</span></span>
+    </a></li>
+    <li><a href="lessons/0002-test-that-and-test-files.html">
+      <span class="n">2</span>
+      <span><span class="t" data-progress="lesson-2"><code>test_that()</code> and test files</span>
+      <span class="d">Name your tests, give them a folder, and run them all with one line.</span></span>
+    </a></li>
+    <li><a href="lessons/0003-choosing-expectations.html">
+      <span class="n">3</span>
+      <span><span class="t" data-progress="lesson-3">Choosing the right expectation</span>
+      <span class="d">The handful of expectations you need, and how to test a function that returns a data frame.</span></span>
+    </a></li>
+    <li><a href="lessons/0004-edge-cases-errors-and-bugs.html">
+      <span class="n">4</span>
+      <span><span class="t" data-progress="lesson-4">Edge cases, errors and bugs</span>
+      <span class="d">Missing values, constant columns, wrong types. Catch a real bug with a failing test, then fix it.</span></span>
+    </a></li>
+    <li><a href="lessons/0005-from-project-to-package.html">
+      <span class="n">5</span>
+      <span><span class="t" data-progress="lesson-5">From project to package</span>
+      <span class="d">Move your functions and tests into a package and run them with <code>devtools::test()</code>.</span></span>
+    </a></li>
+  </ol>
+
+  <h2>Before you start</h2>
+  <ul>
+    <li>R 4.1 or later (the examples use the native pipe, <code>|></code>), with RStudio or Positron.</li>
+    <li>These packages: <code>install.packages(c("testthat", "dplyr", "tibble"))</code>. Lesson 5 adds <code>devtools</code> and <code>usethis</code>.</li>
+    <li>You should be comfortable writing a function and using <code>group_by()</code> and <code>summarise()</code>. No testing experience is assumed.</li>
+  </ul>
+
+  <h2>How to use these pages</h2>
+  <ul>
+    <li><strong>Type, don't just read.</strong> Each lesson has a “Try it” section. The skill is in your fingers, not on the page.</li>
+    <li><strong>Take the quizzes from memory.</strong> Lessons 2 to 5 open with two questions about the lesson before. They are meant to be a little hard; recalling something is what makes it last.</li>
+    <li><strong>Come back.</strong> One lesson a day works better than five in a row. Retake a quiz a few days later; the answers are reshuffled each time.</li>
+    <li><strong>Ask.</strong> When something is unclear, take the exact code and message to your instructor, a classmate, or an AI assistant.</li>
+  </ul>
+
+  <h2>Reference</h2>
+  <ul>
+    <li><a href="reference/cheat-sheet.html">Cheat sheet</a>: every expectation and command from the course on one printable page.</li>
+    <li><a href="reference/glossary.html">Glossary</a>: the vocabulary, defined once and used the same way everywhere.</li>
+    <li><a href="https://github.com/acatlin/r-unit-testing/tree/main/examples">Example code</a>: the starter project, the finished project, and the package from Lesson 5.</li>
+  </ul>
+
+  <h2>Sources</h2>
+  <p>The course follows the people who wrote the tools. Claims in the lessons link to these, and each lesson ends by sending you to one of them.</p>
+  <ul>
+    <li>Hadley Wickham and Jennifer Bryan, <a href="https://r-pkgs.org/testing-basics.html"><em>R Packages</em> (2nd edition)</a>, chapters 13 to 15 on testing.</li>
+    <li>The <a href="https://testthat.r-lib.org/">testthat documentation</a> and its <a href="https://testthat.r-lib.org/reference/index.html">function reference</a>.</li>
+  </ul>
+
+  <p class="colophon">All code and output on these pages was run with R 4.5.3, testthat 3.3.2, dplyr 1.1.4, usethis 3.2.2 and devtools 2.5.2. Quiz scores are stored only in your own browser.</p>
+</main>
+</body>
+</html>

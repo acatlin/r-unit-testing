@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 2: test_that() and test files · Unit Testing in R</title>
+<link rel="stylesheet" href="../assets/course.css">
+<script src="../assets/course.js" defer></script>
+</head>
+<body>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html">Unit Testing in R</a>
+  <nav aria-label="Course">
+    <a href="0001-first-expectation.html">1 Expectations</a>
+    <a href="0002-test-that-and-test-files.html" aria-current="page">2 Test files</a>
+    <a href="0003-choosing-expectations.html">3 Toolkit</a>
+    <a href="0004-edge-cases-errors-and-bugs.html">4 Edge cases</a>
+    <a href="0005-from-project-to-package.html">5 Packages</a>
+    <a href="../reference/cheat-sheet.html">Cheat sheet</a>
+    <a href="../reference/glossary.html">Glossary</a>
+  </nav>
+</div></header>
+
+<main class="page">
+  <p class="eyebrow">Lesson 2 of 5 · about 25 minutes</p>
+  <h1><code>test_that()</code> and test files</h1>
+  <p class="lede">An expectation typed at the console is gone when you close R. This lesson gives your expectations a name, a file, and one command that runs all of them.</p>
+
+  <div class="win">
+    <span class="label">By the end you can</span>
+    <p>Lay out an R project with a <code>tests/testthat/</code> folder, run every test with one line, and read the report.</p>
+  </div>
+
+  <h2>From last time</h2>
+  <p>Two questions from <a href="0001-first-expectation.html">Lesson 1</a>. Answer before reading on; recalling is what makes it stick.</p>
+  <section class="quiz" aria-label="Warm-up">
+    <ol class="questions">
+      <li class="q">
+        <p class="stem">What does a passing <code>expect_equal()</code> print at the console?</p>
+        <ul class="opts">
+          <li data-correct>Nothing at all.</li>
+          <li>The word TRUE.</li>
+          <li>A green tick.</li>
+          <li>The compared values.</li>
+        </ul>
+        <p class="why">Expectations are silent when they pass.</p>
+      </li>
+      <li class="q">
+        <p class="stem">Which expectation demands an exact match, with no numeric tolerance?</p>
+        <ul class="opts">
+          <li data-correct><code>expect_identical()</code></li>
+          <li><code>expect_equal()</code></li>
+          <li><code>expect_same()</code></li>
+          <li><code>expect_exact()</code></li>
+        </ul>
+        <p class="why"><code>expect_equal()</code> tolerates tiny floating-point differences; <code>expect_identical()</code> does not. The other two do not exist.</p>
+      </li>
+    </ol>
+  </section>
+
+  <h2>Group expectations into a test</h2>
+  <p>A <a href="../reference/glossary.html#test">test</a> is a call to <code>test_that()</code>. It takes a description and a block of code in braces that holds one or more expectations about a single behaviour.</p>
+
+  <figure class="code r">
+    <figcaption><span>R</span></figcaption>
+<pre><code>test_that("rescale01() maps the smallest value to 0 and the largest to 1", {
+  expect_equal(rescale01(c(0, 5, 10)), c(0, 0.5, 1))
+  expect_equal(rescale01(c(-2, 0, 2)), c(0, 0.5, 1))
+})</code></pre>
+  </figure>
+  <figure class="code out pass">
+    <figcaption><span>Console</span></figcaption>
+<pre>Test passed with 2 successes 😀.</pre>
+  </figure>
+
+  <p>Write the description so that it completes the sentence “Test that…”. When a test fails months from now, that sentence is the first thing you will read, so make it say what the function should do, not just the function's name.</p>
+  <span class="cite">“Names should be brief, but evocative. It's common to write the description so that it reads like a natural sentence.” <a href="https://testthat.r-lib.org/reference/test_that.html"><code>test_that()</code> reference</a>. The emoji is chosen at random.</span>
+
+  <h2>Give tests a home</h2>
+  <p>Tests live in their own files, apart from the code they test. The layout below is the one testthat expects, and the one R packages use, so learning it now saves relearning it later.</p>
+
+<pre class="tree">cleaning-project/
+├── R/
+│   └── clean.R              your functions
+├── tests/
+│   └── testthat/
+│       └── test-clean.R     tests for the functions in clean.R
+└── run-tests.R              three lines that run everything</pre>
+
+  <p>Two rules matter. Test files go in <code>tests/testthat/</code>, and their names start with <code>test-</code> and end with <code>.R</code>. A file called <code>clean-tests.R</code> is not treated as a test file. If other test files sit beside it, testthat runs those and skips it without a word.</p>
+  <span class="cite">Test files “start with either <code>test-</code> or <code>test_</code>, and end with <code>.r</code> or <code>.R</code>.” <a href="https://testthat.r-lib.org/articles/special-files.html">testthat, “Special files”</a>. The convention <code>R/clean.R</code> ↔ <code>test-clean.R</code> is from <a href="https://r-pkgs.org/testing-basics.html"><em>R Packages</em>, ch. 13</a>.</span>
+
+  <p>The three levels have names you will see in every testthat document:</p>
+  <blockquote>Tests are organised hierarchically: <strong>expectations</strong> are grouped into <strong>tests</strong> which are organised in <strong>files</strong>.
+    <footer>Wickham &amp; Bryan, <a href="https://r-pkgs.org/testing-basics.html"><em>R Packages</em> (2e), ch. 13</a></footer>
+  </blockquote>
+
+  <h2>The test file</h2>
+  <p>Here is <code>tests/testthat/test-clean.R</code>. It tests three small cleaning helpers that live in <code>R/clean.R</code>.</p>
+
+  <figure class="code r">
+    <figcaption><span>tests/testthat/test-clean.R</span></figcaption>
+<pre><code>local_edition(3)
+
+test_that("rescale01() maps the smallest value to 0 and the largest to 1", {
+  expect_equal(rescale01(c(0, 5, 10)), c(0, 0.5, 1))
+  expect_equal(rescale01(c(-2, 0, 2)), c(0, 0.5, 1))
+})
+
+test_that("clean_names() returns lower-case snake_case", {
+  expect_equal(clean_names("First Name"), "first_name")
+  expect_equal(clean_names(c("Total ($)", " Zip-Code ")), c("total", "zip_code"))
+})
+
+test_that("parse_money() strips dollar signs and commas", {
+  expect_equal(parse_money("$1,200.50"), 1200.5)
+  expect_equal(parse_money("75"), 75)
+})</code></pre>
+  </figure>
+
+  <div class="box">
+    <span class="label">What is <code>local_edition(3)</code>?</span>
+    <p>testthat has a current “third edition” with clearer failure messages and stricter comparisons. Packages switch it on in a settings file. A plain project has no such file, so each test file switches it on in its first line. Treat it as a line you always type; it disappears again in <a href="0005-from-project-to-package.html">Lesson 5</a>.</p>
+  </div>
+  <span class="cite">“<code>local_edition()</code> allows you to temporarily (within a single test or a single test file) change the active edition of testthat.” <a href="https://testthat.r-lib.org/reference/local_edition.html">reference</a>; background in <a href="https://testthat.r-lib.org/articles/third-edition.html">“testthat 3e”</a>.</span>
+
+  <h2>Run everything</h2>
+  <p>The test file calls <code>rescale01()</code> but does not define it. In a plain project, loading your functions is your job. <code>run-tests.R</code> does it and then hands the folder to testthat.</p>
+
+  <figure class="code r">
+    <figcaption><span>run-tests.R</span></figcaption>
+<pre><code>library(testthat)
+
+source("R/clean.R")           # load the functions being tested
+test_dir("tests/testthat")    # run every test-*.R file in that folder</code></pre>
+  </figure>
+  <figure class="code out pass">
+    <figcaption><span>Console, after source("run-tests.R")</span></figcaption>
+<pre>✔ | F W  S  OK | Context
+✔ |          6 | clean
+
+══ Results ═════════════════════════════════════════════════════════════════════
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 6 ]</pre>
+  </figure>
+  <span class="cite">With <code>test_dir()</code> outside a package, “you are responsible for ensuring that the functions to test are available”. <a href="https://testthat.r-lib.org/reference/test_dir.html"><code>test_dir()</code> reference</a>.</span>
+
+  <p>Each row is one test file (“clean” is <code>test-clean.R</code> without its prefix and suffix). The columns count <strong>F</strong>ailures, <strong>W</strong>arnings, <strong>S</strong>kips and passes. Note what is being counted: 6 is the number of <em>expectations</em>, not the number of tests (3) or files (1).</p>
+
+  <h2>Reading a failure</h2>
+  <p>Suppose you had typed the expected name as <code>"zip-code"</code>. The report becomes:</p>
+
+  <figure class="code out fail">
+    <figcaption><span>Console</span></figcaption>
+<pre>✔ | F W  S  OK | Context
+✖ | 1        5 | clean
+────────────────────────────────────────────────────────────────────────────────
+Failure ('test-clean.R:10:3'): clean_names() returns lower-case snake_case
+Expected `clean_names(c("Total ($)", " Zip-Code "))` to equal `c("total", "zip-code")`.
+Differences:
+`actual`:   "total" "zip_code"
+`expected`: "total" "zip-code"
+────────────────────────────────────────────────────────────────────────────────
+
+[ FAIL 1 | WARN 0 | SKIP 0 | PASS 5 ]</pre>
+  </figure>
+
+  <p>Read it in three steps. <strong>Where:</strong> <code>test-clean.R:10:3</code> is file, line and column. <strong>What:</strong> the description you wrote for the test. <strong>Why:</strong> the actual and expected values, lined up so the difference is visible. Then decide which side is wrong. Here the function is fine and the test was mistyped, and that happens more often than you would think.</p>
+
+  <div class="box trap">
+    <span class="label">Common trap</span>
+    <p>If every test fails with <code>could not find function "rescale01"</code>, nothing is wrong with your tests. The functions were never loaded: you ran <code>test_dir()</code> without first running <code>source("R/clean.R")</code>.</p>
+  </div>
+
+  <h2>Try it</h2>
+  <ol class="steps">
+    <li>Download the <a href="https://github.com/acatlin/r-unit-testing/tree/main/examples/cleaning-project-starter">starter project</a> (or build the three files above by hand; typing them is good practice). You need the dplyr package installed, because one helper in <code>clean.R</code> uses it.</li>
+    <li>Open the project folder in RStudio or Positron so that it is your working directory, then run <code>source("run-tests.R")</code>. You should see <code>PASS 6</code>.</li>
+    <li>Add a third expectation to the <code>parse_money()</code> test, for the input <code>"$3,000"</code>. Run again and watch the count become 7.</li>
+    <li>Rename the file to <code>clean-tests.R</code> and run again. You should get the error <code>No test files found.</code> Rename it back.</li>
+  </ol>
+
+  <h2>Check yourself</h2>
+  <section class="quiz" data-quiz="lesson-2" aria-label="Lesson 2 quiz">
+    <ol class="questions">
+      <li class="q">
+        <p class="stem">What is the first argument of <code>test_that()</code>?</p>
+        <ul class="opts">
+          <li data-correct>A sentence describing what should happen.</li>
+          <li>The folder containing the test files.</li>
+          <li>The function whose output is checked.</li>
+          <li>The number of expectations to run.</li>
+        </ul>
+        <p class="why"><code>test_that(desc, code)</code>: a description, then a braced block of expectations.</p>
+      </li>
+      <li class="q">
+        <p class="stem">Which of these files in <code>tests/testthat/</code> will <code>test_dir()</code> run?</p>
+        <ul class="opts">
+          <li data-correct><code>test-clean.R</code></li>
+          <li><code>clean-test.R</code></li>
+          <li><code>check-clean.R</code></li>
+          <li><code>clean.R</code></li>
+        </ul>
+        <p class="why">Test file names must start with <code>test-</code> (or <code>test_</code>). Anything else is silently skipped.</p>
+      </li>
+      <li class="q">
+        <p class="stem">You run <code>test_dir()</code> and every test reports <code>could not find function "rescale01"</code>. What is the likeliest cause?</p>
+        <ul class="opts">
+          <li data-correct>The file defining it was never sourced.</li>
+          <li>The test file has the wrong name.</li>
+          <li>The testthat package is not installed yet.</li>
+          <li>The expected values were typed in wrong.</li>
+        </ul>
+        <p class="why">In a plain project you must <code>source()</code> your functions before running the tests. A misnamed test file would not run at all, so it could not produce this error.</p>
+      </li>
+      <li class="q">
+        <p class="stem">A run ends with <code>[ FAIL 1 | WARN 0 | SKIP 0 | PASS 5 ]</code>. What happened?</p>
+        <ul class="opts">
+          <li data-correct>Five expectations passed and one failed.</li>
+          <li>Five files passed and one failed.</li>
+          <li>Five functions passed and one failed.</li>
+          <li>Five tests passed and one skipped.</li>
+        </ul>
+        <p class="why">The summary counts expectations. Those six expectations might sit in three tests in one file.</p>
+      </li>
+      <li class="q">
+        <p class="stem">Why does a test file in a plain project begin with <code>local_edition(3)</code>?</p>
+        <ul class="opts">
+          <li data-correct>It switches on testthat's third edition.</li>
+          <li>It loads the functions under test.</li>
+          <li>It repeats every test three times.</li>
+          <li>It limits output to three failures.</li>
+        </ul>
+        <p class="why">It selects testthat's third edition for that file. Loading your functions is the job of <code>source()</code>.</p>
+      </li>
+    </ol>
+  </section>
+
+  <div class="box source">
+    <span class="label">Read next (primary source)</span>
+    <p><a href="https://r-pkgs.org/testing-basics.html"><em>R Packages</em> (2e), chapter 13, section “Test organisation”</a>, for how the authors of testthat name and arrange test files.</p>
+  </div>
+
+  <div class="box ask">
+    <span class="label">Stuck or curious?</span>
+    <p>Ask. If a run does not look like the ones on this page, copy the whole report and take it to your instructor, a classmate, or an AI assistant. “Here is what I ran, here is what I got, here is what I expected” is the most useful question format there is.</p>
+  </div>
+
+  <nav class="pager" aria-label="Lesson">
+    <a href="0001-first-expectation.html">← Lesson 1: Your first expectation</a>
+    <a class="next" href="0003-choosing-expectations.html">Lesson 3: Choosing the right expectation →</a>
+  </nav>
+  <p class="colophon">Keep handy: <a href="../reference/cheat-sheet.html">cheat sheet</a> · <a href="../reference/glossary.html">glossary</a>. Output on this page is from R 4.5.3 with testthat 3.3.2; progress-animation lines are omitted.</p>
+</main>
+</body>
+</html>

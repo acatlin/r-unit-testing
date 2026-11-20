@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 1: Your first expectation · Unit Testing in R</title>
+<link rel="stylesheet" href="../assets/course.css">
+<script src="../assets/course.js" defer></script>
+</head>
+<body>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html">Unit Testing in R</a>
+  <nav aria-label="Course">
+    <a href="0001-first-expectation.html" aria-current="page">1 Expectations</a>
+    <a href="0002-test-that-and-test-files.html">2 Test files</a>
+    <a href="0003-choosing-expectations.html">3 Toolkit</a>
+    <a href="0004-edge-cases-errors-and-bugs.html">4 Edge cases</a>
+    <a href="0005-from-project-to-package.html">5 Packages</a>
+    <a href="../reference/cheat-sheet.html">Cheat sheet</a>
+    <a href="../reference/glossary.html">Glossary</a>
+  </nav>
+</div></header>
+
+<main class="page">
+  <p class="eyebrow">Lesson 1 of 5 · about 20 minutes</p>
+  <h1>Your first expectation</h1>
+  <p class="lede">You already test your code. You run a function in the console, look at what comes back, and decide whether it seems right. This lesson turns that glance into one line of R that can be run again tomorrow.</p>
+
+  <div class="win">
+    <span class="label">By the end you can</span>
+    <p>Write an <code>expect_equal()</code> call for a function of your own, and read what testthat says when it passes and when it fails.</p>
+  </div>
+
+  <h2>The check that disappears</h2>
+  <p>Here is a small helper of the kind you write all the time while cleaning data. It rescales a numeric column so that its smallest value becomes 0 and its largest becomes 1.</p>
+
+  <figure class="code r">
+    <figcaption><span>R</span></figcaption>
+<pre><code>rescale01 &lt;- function(x) {
+  rng &lt;- range(x, na.rm = TRUE)
+  (x - rng[1]) / (rng[2] - rng[1])
+}
+
+rescale01(c(0, 5, 10))</code></pre>
+  </figure>
+  <figure class="code out">
+    <figcaption><span>Console</span></figcaption>
+<pre>[1] 0.0 0.5 1.0</pre>
+  </figure>
+
+  <p>That looks right, and you move on. The trouble is that the check lived only in your head. Next month you change <code>rescale01()</code>, or a classmate does, and nobody repeats it. A <a href="../reference/glossary.html#unit-test">unit test</a> is the same check written down as code, so the computer can repeat it for you after every change.</p>
+
+  <p>Hadley Wickham and Jennifer Bryan list four ways this pays off: you have fewer bugs because you are explicit about how code should behave; code that is easy to test tends to be better structured; a failing test tells you where to start work; and you can make big changes without worrying about breaking something by accident.</p>
+  <span class="cite">Source: <a href="https://r-pkgs.org/testing-basics.html"><em>R Packages</em> (2e), ch. 13, “Testing basics”</a>.</span>
+
+  <h2>Say what you expect</h2>
+  <p>The package that nearly everyone uses for this in R is <a href="https://testthat.r-lib.org/">testthat</a>. Install it once, then load it.</p>
+
+  <figure class="code r">
+    <figcaption><span>R</span></figcaption>
+<pre><code>install.packages("testthat")   # once per computer
+library(testthat)              # once per R session</code></pre>
+  </figure>
+
+  <p>Its basic building block is the <a href="../reference/glossary.html#expectation">expectation</a>: a function whose name starts with <code>expect_</code> and that compares what your code did with what you say it should have done. The one you will use most is <code>expect_equal()</code>.</p>
+
+  <figure class="code r">
+    <figcaption><span>R</span></figcaption>
+<pre><code>expect_equal(rescale01(c(0, 5, 10)), c(0, 0.5, 1))</code></pre>
+  </figure>
+
+  <p>Run it, and nothing is printed. <strong>Silence means the expectation passed.</strong> Read the call as a sentence: “I expect <code>rescale01(c(0, 5, 10))</code> to equal <code>c(0, 0.5, 1)</code>.”</p>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Position</th><th>Name</th><th>What you put there</th></tr></thead>
+    <tbody>
+      <tr><td>First</td><td><a href="../reference/glossary.html#actual">actual</a></td><td>A call to your function. R runs it.</td></tr>
+      <tr><td>Second</td><td><a href="../reference/glossary.html#expected">expected</a></td><td>The right answer, which you work out yourself and type in.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite">Signature: <code>expect_equal(object, expected, ...)</code>. See <a href="https://testthat.r-lib.org/reference/equality-expectations.html">testthat reference, equality expectations</a>.</span>
+
+  <h2>Watch one fail</h2>
+  <p>A check you have never seen fail is a check you cannot trust yet. Change the expected value so that it is wrong on purpose.</p>
+
+  <figure class="code r">
+    <figcaption><span>R</span></figcaption>
+<pre><code>expect_equal(rescale01(c(0, 5, 10)), c(0, 0.5, 2))</code></pre>
+  </figure>
+  <figure class="code out fail">
+    <figcaption><span>Console</span></figcaption>
+<pre>Error: Expected `rescale01(c(0, 5, 10))` to equal `c(0, 0.5, 2)`.
+Differences:
+1/3 mismatches
+[3] 1 - 2 == -1</pre>
+  </figure>
+
+  <p>The message tells you which call disagreed with which expected value, how many elements differ (1 of 3), and where: element <code>[3]</code> was 1 and you said 2. Put the 1 back and the expectation is silent again.</p>
+  <span class="cite">Output shown is from testthat 3.3.2 typed at the console. The wording changes a little between versions; the content does not.</span>
+
+  <h2>Equal is not the same as identical</h2>
+  <p>Computers store most decimal numbers approximately, which leads to a famous surprise.</p>
+
+  <figure class="code r">
+    <figcaption><span>R</span></figcaption>
+<pre><code>0.1 + 0.2 == 0.3</code></pre>
+  </figure>
+  <figure class="code out">
+    <figcaption><span>Console</span></figcaption>
+<pre>[1] FALSE</pre>
+  </figure>
+
+  <p>If expectations compared numbers with <code>==</code>, tests of numeric code would fail for reasons that have nothing to do with bugs. So <code>expect_equal()</code> ignores tiny floating-point differences (anything smaller than roughly 1.5 × 10<sup>−8</sup> in relative terms). Its strict sibling, <code>expect_identical()</code>, does not.</p>
+
+  <figure class="code r">
+    <figcaption><span>R</span></figcaption>
+<pre><code>expect_equal(0.1 + 0.2, 0.3)       # silent: passes
+expect_identical(0.1 + 0.2, 0.3)   # fails</code></pre>
+  </figure>
+  <figure class="code out fail">
+    <figcaption><span>Console</span></figcaption>
+<pre>Error: Expected `0.1 + 0.2` to be identical to 0.3.
+Differences:
+Objects equal but not identical</pre>
+  </figure>
+  <span class="cite">“<code>expect_equal()</code> checks for equality, with some reasonable amount of numeric tolerance… If you want to test for exact equivalence, use <code>expect_identical()</code>.” <a href="https://r-pkgs.org/testing-basics.html"><em>R Packages</em>, ch. 13</a>.</span>
+
+  <p>For the numeric results that fill data science work, reach for <code>expect_equal()</code> first.</p>
+
+  <h2>Try it</h2>
+  <p>Open R and do these in the console. Work out each expected value in your head or on paper <em>before</em> you run anything; that is the whole point.</p>
+  <ol class="steps">
+    <li>Define <code>rescale01()</code> from the top of this page and load testthat.</li>
+    <li>Write an expectation for <code>rescale01(c(-2, 0, 2))</code>. It should be silent.</li>
+    <li>Write one for <code>rescale01(c(10, 20, 30, 50))</code>. If it fails, read the message and decide who is wrong: the function, or your arithmetic.</li>
+    <li>Break one of your expectations on purpose, read the failure, and repair it.</li>
+  </ol>
+
+  <h2>Check yourself</h2>
+  <p>Answer from memory, without scrolling up. Getting one wrong and reading why is worth more than getting it right by looking.</p>
+
+  <section class="quiz" data-quiz="lesson-1" aria-label="Lesson 1 quiz">
+    <ol class="questions">
+      <li class="q">
+        <p class="stem">You run an expectation at the console and R prints nothing at all. What happened?</p>
+        <ul class="opts">
+          <li data-correct>The expectation passed without complaint.</li>
+          <li>The expectation was skipped entirely.</li>
+          <li>The expectation failed without output.</li>
+          <li>The expectation never actually ran.</li>
+        </ul>
+        <p class="why">A passing expectation is silent. Only a failure prints anything.</p>
+      </li>
+      <li class="q">
+        <p class="stem">In <code>expect_equal(rescale01(c(0, 5, 10)), c(0, 0.5, 1))</code>, what is the second argument?</p>
+        <ul class="opts">
+          <li data-correct>The right answer, which you supplied yourself.</li>
+          <li>The value your function has actually returned.</li>
+          <li>The biggest numeric gap testthat will allow.</li>
+          <li>The message printed when the check fails.</li>
+        </ul>
+        <p class="why">The first argument is the actual result (a call to your function). The second is the expected result, which comes from you.</p>
+      </li>
+      <li class="q">
+        <p class="stem">Why does <code>expect_equal(0.1 + 0.2, 0.3)</code> pass even though <code>0.1 + 0.2 == 0.3</code> is <code>FALSE</code>?</p>
+        <ul class="opts">
+          <li data-correct>It ignores very tiny differences by default.</li>
+          <li>It rounds both values to two decimals.</li>
+          <li>It converts both values into character strings.</li>
+          <li>It only compares the types of values.</li>
+        </ul>
+        <p class="why"><code>expect_equal()</code> has a small numeric tolerance. <code>expect_identical()</code> has none, so it fails here.</p>
+      </li>
+      <li class="q">
+        <p class="stem">What does writing a check as an expectation give you that looking at console output does not?</p>
+        <ul class="opts">
+          <li data-correct>It can be rerun after every change.</li>
+          <li>It makes the function run noticeably faster.</li>
+          <li>It removes any need for reading documentation.</li>
+          <li>It guarantees the function has no bugs.</li>
+        </ul>
+        <p class="why">A written check is repeatable. It makes bugs less likely, not impossible: a test only covers the cases you thought to write.</p>
+      </li>
+    </ol>
+  </section>
+
+  <div class="box source">
+    <span class="label">Read next (primary source)</span>
+    <p><a href="https://r-pkgs.org/testing-basics.html"><em>R Packages</em> (2e), chapter 13, “Testing basics”</a>, sections 13.1 and 13.2. It is written by the authors of testthat. It talks about packages, which we reach in <a href="0005-from-project-to-package.html">Lesson 5</a>; the reasoning applies to any R code.</p>
+  </div>
+
+  <div class="box ask">
+    <span class="label">Stuck or curious?</span>
+    <p>Ask. Bring the exact code and the exact message to your instructor, your classmates, or an AI assistant, and ask why it behaves that way. A question asked while you are confused teaches more than a page read while you are not.</p>
+  </div>
+
+  <nav class="pager" aria-label="Lesson">
+    <a href="../index.html">← Course home</a>
+    <a class="next" href="0002-test-that-and-test-files.html">Lesson 2: <code>test_that()</code> and test files →</a>
+  </nav>
+  <p class="colophon">Keep handy: <a href="../reference/cheat-sheet.html">cheat sheet</a> · <a href="../reference/glossary.html">glossary</a>. Code on this page was run with R 4.5.3 and testthat 3.3.2.</p>
+</main>
+</body>
+</html>

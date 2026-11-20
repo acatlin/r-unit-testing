@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 5: From project to package · Unit Testing in R</title>
+<link rel="stylesheet" href="../assets/course.css">
+<script src="../assets/course.js" defer></script>
+</head>
+<body>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html">Unit Testing in R</a>
+  <nav aria-label="Course">
+    <a href="0001-first-expectation.html">1 Expectations</a>
+    <a href="0002-test-that-and-test-files.html">2 Test files</a>
+    <a href="0003-choosing-expectations.html">3 Toolkit</a>
+    <a href="0004-edge-cases-errors-and-bugs.html">4 Edge cases</a>
+    <a href="0005-from-project-to-package.html" aria-current="page">5 Packages</a>
+    <a href="../reference/cheat-sheet.html">Cheat sheet</a>
+    <a href="../reference/glossary.html">Glossary</a>
+  </nav>
+</div></header>
+
+<main class="page">
+  <p class="eyebrow">Lesson 5 of 5 · about 30 minutes</p>
+  <h1>From project to package</h1>
+  <p class="lede">Your project already has an <code>R/</code> folder and a <code>tests/testthat/</code> folder. That is most of an R package. Taking the last step gets you tooling that loads your code, runs your tests and checks your work with one keystroke each.</p>
+
+  <div class="win">
+    <span class="label">By the end you can</span>
+    <p>Move your functions and tests into a package and run all of them with <code>devtools::test()</code>.</p>
+  </div>
+
+  <h2>From last time</h2>
+  <section class="quiz" aria-label="Warm-up">
+    <ol class="questions">
+      <li class="q">
+        <p class="stem">Beyond “an error occurred”, what does <code>expect_error(f(x), "must be numeric")</code> check?</p>
+        <ul class="opts">
+          <li data-correct>That the message matches that text.</li>
+          <li>That the error has that class.</li>
+          <li>That the function returns that text.</li>
+          <li>That the warning matches that text.</li>
+        </ul>
+        <p class="why">The second argument is a regular expression matched against the error message.</p>
+      </li>
+      <li class="q">
+        <p class="stem">After finding a bug, why write the failing test before the fix?</p>
+        <ul class="opts">
+          <li data-correct>It proves the test detects the bug.</li>
+          <li>It makes the fix run more quickly.</li>
+          <li>It hides the bug from other users.</li>
+          <li>It removes the need for a fix.</li>
+        </ul>
+        <p class="why">A test you have seen fail is one you know is able to fail.</p>
+      </li>
+    </ol>
+  </section>
+
+  <h2>What changes, and what does not</h2>
+  <p>Everything you learned about expectations and <code>test_that()</code> carries over unchanged. Three chores go away.</p>
+
+  <div class="table-wrap wide">
+  <table>
+    <thead><tr><th>Chore</th><th>Plain project</th><th>Package</th></tr></thead>
+    <tbody>
+      <tr><td>Loading your functions</td><td><code>source("R/clean.R")</code> yourself</td><td>Done for you by <code>devtools::load_all()</code> and <code>devtools::test()</code></td></tr>
+      <tr><td>Choosing the edition</td><td><code>local_edition(3)</code> at the top of every test file</td><td>One line in the <code>DESCRIPTION</code> file</td></tr>
+      <tr><td>Running the tests</td><td><code>source("run-tests.R")</code></td><td><code>devtools::test()</code>, or <kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite">“<code>devtools::test()</code> is mapped to Ctrl/Cmd + Shift + T.” <a href="https://r-pkgs.org/testing-basics.html"><em>R Packages</em> (2e), ch. 13</a>. The shortcut is RStudio's.</span>
+
+  <h2>Build it</h2>
+  <p>You need two more packages, both installed once: <code>install.packages(c("devtools", "usethis"))</code>. Then follow the steps. Each <code>usethis</code> function creates files and tells you what it did.</p>
+
+  <ol class="steps">
+    <li>
+      <strong>Create the package.</strong> Run this from a folder that is <em>not</em> inside another project. It makes a new folder called <code>cleaner</code> and opens it.
+      <figure class="code r">
+        <figcaption><span>R</span></figcaption>
+<pre><code>usethis::create_package("cleaner")</code></pre>
+      </figure>
+    </li>
+    <li>
+      <strong>Add a file for your functions</strong>, and paste in the four functions from your project's <code>R/clean.R</code>.
+      <figure class="code r">
+        <figcaption><span>R</span></figcaption>
+<pre><code>usethis::use_r("clean")        # creates and opens R/clean.R</code></pre>
+      </figure>
+    </li>
+    <li>
+      <strong>Switch on testing.</strong> The <code>3</code> is the edition.
+      <figure class="code r">
+        <figcaption><span>R</span></figcaption>
+<pre><code>usethis::use_testthat(3)</code></pre>
+      </figure>
+      <figure class="code out pass">
+        <figcaption><span>Console</span></figcaption>
+<pre>✔ Adding testthat to 'Suggests' field in DESCRIPTION.
+✔ Adding "3" to 'Config/testthat/edition'.
+✔ Creating 'tests/testthat/'.
+✔ Writing 'tests/testthat.R'.</pre>
+      </figure>
+    </li>
+    <li>
+      <strong>Add a test file</strong>, and paste in your tests <em>without</em> the <code>local_edition(3)</code> line. Delete the placeholder test that usethis put there.
+      <figure class="code r">
+        <figcaption><span>R</span></figcaption>
+<pre><code>usethis::use_test("clean")     # creates and opens tests/testthat/test-clean.R</code></pre>
+      </figure>
+    </li>
+    <li>
+      <strong>Declare the packages you depend on.</strong> <code>summarise_by()</code> uses dplyr; the tests use tibble.
+      <figure class="code r">
+        <figcaption><span>R</span></figcaption>
+<pre><code>usethis::use_package("dplyr")                      # needed by your functions
+usethis::use_package("tibble", type = "Suggests")  # needed only by your tests</code></pre>
+      </figure>
+    </li>
+    <li>
+      <strong>Run the tests.</strong>
+      <figure class="code r">
+        <figcaption><span>R</span></figcaption>
+<pre><code>devtools::test()</code></pre>
+      </figure>
+      <figure class="code out pass">
+        <figcaption><span>Console</span></figcaption>
+<pre>ℹ Testing cleaner
+✔ | F W  S  OK | Context
+✔ |         17 | clean
+
+══ Results ═════════════════════════════════════════════════════════════════════
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 17 ]</pre>
+      </figure>
+    </li>
+  </ol>
+  <span class="cite"><code>use_testthat()</code> “initializes the unit testing machinery for your package”; <code>use_test()</code> “opens and/or creates a test file”. <a href="https://r-pkgs.org/whole-game.html"><em>R Packages</em> (2e), ch. 1, “The Whole Game”</a>.</span>
+
+  <h2>What you now have</h2>
+
+<pre class="tree">cleaner/
+├── DESCRIPTION              settings: name, dependencies, testthat edition
+├── NAMESPACE                managed for you
+├── R/
+│   └── clean.R              your functions
+└── tests/
+    ├── testthat.R           runs the tests during a full package check
+    └── testthat/
+        └── test-clean.R     your tests</pre>
+
+  <p>Compare this with the tree in <a href="0002-test-that-and-test-files.html">Lesson 2</a>. <code>R/</code> and <code>tests/testthat/</code> are exactly where they were. <code>run-tests.R</code> is gone, and two things have appeared.</p>
+
+  <p><strong><code>DESCRIPTION</code></strong> holds the package's settings. Open it and you will find the line that replaces every <code>local_edition(3)</code>:</p>
+
+  <figure class="code out">
+    <figcaption><span>DESCRIPTION (excerpt)</span></figcaption>
+<pre>Imports:
+    dplyr
+Suggests:
+    testthat (>= 3.0.0),
+    tibble
+Config/testthat/edition: 3</pre>
+  </figure>
+  <span class="cite">“The usual way to activate the 3rd edition is to add a line to your <code>DESCRIPTION</code>… This will activate the 3rd edition for every test in your package.” <a href="https://testthat.r-lib.org/articles/third-edition.html">testthat 3e</a>.</span>
+
+  <p><strong><code>tests/testthat.R</code></strong> is a three-line launcher used when the whole package is checked. Leave it alone; <em>R Packages</em> says plainly, “Do not edit <code>tests/testthat.R</code>!”</p>
+
+  <div class="box trap">
+    <span class="label">Common trap</span>
+    <p>In a script you write <code>library(dplyr)</code> at the top. In package code under <code>R/</code>, don't. Call other packages' functions as <code>dplyr::group_by()</code> and declare the package with <code>usethis::use_package("dplyr")</code>. The functions in this course were written that way from the start, so they move over unchanged.</p>
+  </div>
+  <span class="cite">“Our recommended default is to call external functions using the <code>package::function()</code> syntax.” <a href="https://r-pkgs.org/dependencies-in-practice.html"><em>R Packages</em> (2e), ch. 11</a>.</span>
+
+  <h2>The working loop</h2>
+  <p>With a package, day-to-day work becomes a short cycle. You will repeat it many times an hour.</p>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Step</th><th>Command</th><th>RStudio shortcut</th></tr></thead>
+    <tbody>
+      <tr><td>Edit a function or a test</td><td></td><td></td></tr>
+      <tr><td>Reload your functions to try them in the console</td><td><code>devtools::load_all()</code></td><td><kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>L</kbd></td></tr>
+      <tr><td>Run every test</td><td><code>devtools::test()</code></td><td><kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd></td></tr>
+      <tr><td>Now and then, check the whole package</td><td><code>devtools::check()</code></td><td><kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>E</kbd></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite">Shortcuts as given in <a href="https://r-pkgs.org/testing-basics.html"><em>R Packages</em>, ch. 13</a> and <a href="https://r-pkgs.org/whole-game.html">ch. 1</a>.</span>
+
+  <p>Because running the tests is now one keystroke, you will run them far more often, and tests that are run often are the ones that catch things.</p>
+
+  <h2>Try it</h2>
+  <ol class="steps">
+    <li>Follow the six steps under “Build it” with your own project from Lesson 4. Finish with <code>PASS 17</code> or more. A finished copy is in <a href="https://github.com/acatlin/r-unit-testing/tree/main/examples/cleaner"><code>examples/cleaner</code></a>.</li>
+    <li>Break <code>clean_names()</code> on purpose (delete the <code>tolower()</code> line), press the test shortcut, and read the report. Undo the change and run again.</li>
+    <li>Add a new function to the package using the full loop: <code>use_r()</code>, <code>use_test()</code>, write a failing test first, then make it pass. An idea: <code>squish()</code>, which trims a string and collapses runs of spaces into one.</li>
+  </ol>
+
+  <h2>Check yourself</h2>
+  <section class="quiz" data-quiz="lesson-5" aria-label="Lesson 5 quiz">
+    <ol class="questions">
+      <li class="q">
+        <p class="stem">In a package, what replaces <code>local_edition(3)</code> at the top of each test file?</p>
+        <ul class="opts">
+          <li data-correct>An edition field inside <code>DESCRIPTION</code>.</li>
+          <li>A <code>library(testthat)</code> line in <code>NAMESPACE</code>.</li>
+          <li>A <code>source()</code> call in <code>testthat.R</code>.</li>
+          <li>An <code>options()</code> call in <code>.Rprofile</code>.</li>
+        </ul>
+        <p class="why"><code>Config/testthat/edition: 3</code> in <code>DESCRIPTION</code> sets the edition for every test in the package.</p>
+      </li>
+      <li class="q">
+        <p class="stem">Which call creates <code>tests/testthat/</code> and sets the edition for a package?</p>
+        <ul class="opts">
+          <li data-correct><code>usethis::use_testthat(3)</code></li>
+          <li><code>usethis::use_test("clean")</code></li>
+          <li><code>devtools::load_all()</code></li>
+          <li><code>devtools::check()</code></li>
+        </ul>
+        <p class="why"><code>use_testthat(3)</code> is run once per package. <code>use_test()</code> is run once per test file.</p>
+      </li>
+      <li class="q">
+        <p class="stem">Why do package tests need no <code>source("R/clean.R")</code>?</p>
+        <ul class="opts">
+          <li data-correct><code>devtools::test()</code> loads the package code first.</li>
+          <li>Package tests never call your functions.</li>
+          <li><code>testthat.R</code> sources each file by name.</li>
+          <li>R sources every folder at startup.</li>
+        </ul>
+        <p class="why"><code>devtools::test()</code> loads everything under <code>R/</code> before it runs the tests, so your functions are already available.</p>
+      </li>
+      <li class="q">
+        <p class="stem">Which file does <code>usethis::use_test("clean")</code> create?</p>
+        <ul class="opts">
+          <li data-correct><code>tests/testthat/test-clean.R</code></li>
+          <li><code>tests/testthat/clean-test.R</code></li>
+          <li><code>tests/testthat/check-clean.R</code></li>
+          <li><code>tests/test-clean/testthat.R</code></li>
+        </ul>
+        <p class="why">It adds the <code>test-</code> prefix and puts the file in <code>tests/testthat/</code>, matching <code>R/clean.R</code>.</p>
+      </li>
+      <li class="q">
+        <p class="stem">How should package code in <code>R/clean.R</code> use dplyr's <code>group_by()</code>?</p>
+        <ul class="opts">
+          <li data-correct>Write <code>dplyr::group_by()</code> and list dplyr in Imports.</li>
+          <li>Call <code>library(dplyr)</code> at the top of <code>clean.R</code>.</li>
+          <li>Call <code>install.packages("dplyr")</code> at the top of <code>clean.R</code>.</li>
+          <li>Copy the <code>group_by()</code> source code into <code>clean.R</code>.</li>
+        </ul>
+        <p class="why">Use the <code>package::function()</code> form, and let <code>usethis::use_package("dplyr")</code> add dplyr to <code>Imports</code> in <code>DESCRIPTION</code>.</p>
+      </li>
+    </ol>
+  </section>
+
+  <h2>Where to go from here</h2>
+  <p>You can now write, organise and run tests by hand, in a project or a package. There is more to learn, and later lessons in this course will take it up: snapshot tests for output that is awkward to type out, test fixtures and helper files, skipping tests, and measuring how much of your code the tests reach.</p>
+  <p>Testing is also a craft that people argue about. When you have a question with no clear answer in the documentation, such as how much testing is enough for an analysis project, ask people who do this for a living. The <a href="https://forum.posit.co/">Posit Community forum</a> has a package-development category that covers “devtools, roxygen2, testthat, and friends”.</p>
+
+  <div class="box source">
+    <span class="label">Read next (primary source)</span>
+    <p><a href="https://r-pkgs.org/whole-game.html"><em>R Packages</em> (2e), chapter 1, “The Whole Game”</a>. It builds a small package from nothing, with tests, in one sitting. Work through it at the keyboard.</p>
+  </div>
+
+  <div class="box ask">
+    <span class="label">Stuck or curious?</span>
+    <p>Ask. Package setup produces unfamiliar messages the first time. Copy the message and take it to your instructor, a classmate, or an AI assistant before you spend half an hour guessing.</p>
+  </div>
+
+  <nav class="pager" aria-label="Lesson">
+    <a href="0004-edge-cases-errors-and-bugs.html">← Lesson 4: Edge cases, errors and bugs</a>
+    <a class="next" href="../index.html">Course home →</a>
+  </nav>
+  <p class="colophon">Keep handy: <a href="../reference/cheat-sheet.html">cheat sheet</a> · <a href="../reference/glossary.html">glossary</a>. Output on this page is from R 4.5.3 with testthat 3.3.2, usethis 3.2.2 and devtools 2.5.2.</p>
+</main>
+</body>
+</html>

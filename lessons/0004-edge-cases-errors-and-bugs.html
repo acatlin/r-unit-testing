@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 4: Edge cases, errors and bugs · Unit Testing in R</title>
+<link rel="stylesheet" href="../assets/course.css">
+<script src="../assets/course.js" defer></script>
+</head>
+<body>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html">Unit Testing in R</a>
+  <nav aria-label="Course">
+    <a href="0001-first-expectation.html">1 Expectations</a>
+    <a href="0002-test-that-and-test-files.html">2 Test files</a>
+    <a href="0003-choosing-expectations.html">3 Toolkit</a>
+    <a href="0004-edge-cases-errors-and-bugs.html" aria-current="page">4 Edge cases</a>
+    <a href="0005-from-project-to-package.html">5 Packages</a>
+    <a href="../reference/cheat-sheet.html">Cheat sheet</a>
+    <a href="../reference/glossary.html">Glossary</a>
+  </nav>
+</div></header>
+
+<main class="page">
+  <p class="eyebrow">Lesson 4 of 5 · about 30 minutes</p>
+  <h1>Edge cases, errors and bugs</h1>
+  <p class="lede">Every test so far fed a function tidy input and checked a tidy answer. Real data is not tidy. This lesson is about the inputs that break things, and a habit that keeps a bug from coming back once you have fixed it.</p>
+
+  <div class="win">
+    <span class="label">By the end you can</span>
+    <p>Find a real bug in <code>rescale01()</code>, pin it down with a failing test, fix it, and watch the test go green.</p>
+  </div>
+
+  <h2>From last time</h2>
+  <section class="quiz" aria-label="Warm-up">
+    <ol class="questions">
+      <li class="q">
+        <p class="stem">Which expectation checks that a result is a tibble?</p>
+        <ul class="opts">
+          <li data-correct><code>expect_s3_class()</code></li>
+          <li><code>expect_type()</code></li>
+          <li><code>expect_named()</code></li>
+          <li><code>expect_length()</code></li>
+        </ul>
+        <p class="why"><code>expect_s3_class(out, "tbl_df")</code>. <code>expect_type()</code> looks at the base type, which for any data frame is <code>"list"</code>.</p>
+      </li>
+      <li class="q">
+        <p class="stem">In a plain project, what must happen before <code>test_dir()</code> can test your functions?</p>
+        <ul class="opts">
+          <li data-correct>Their definitions must be sourced.</li>
+          <li>Their names must start <code>test-</code>.</li>
+          <li>Their package must be installed.</li>
+          <li>Their outputs must be saved.</li>
+        </ul>
+        <p class="why"><code>source("R/clean.R")</code> comes first; otherwise every test reports “could not find function”.</p>
+      </li>
+    </ol>
+  </section>
+
+  <h2>Ask what could go wrong</h2>
+  <p>The tests you have written cover the <a href="../reference/glossary.html#happy-path">happy path</a>: ordinary input, ordinary output. Bugs mostly live elsewhere. For a function that takes a column of data, run through this list and ask of each item, “what <em>should</em> happen?”</p>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Edge case</th><th>Example input</th></tr></thead>
+    <tbody>
+      <tr><td>Missing values</td><td><code>c(1, NA, 3)</code></td></tr>
+      <tr><td>Every value the same</td><td><code>c(5, 5, 5)</code></td></tr>
+      <tr><td>A single value</td><td><code>7</code></td></tr>
+      <tr><td>Nothing at all</td><td><code>numeric(0)</code></td></tr>
+      <tr><td>The wrong type</td><td><code>"a"</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Deciding the answer is design work, and the test is where you record the decision. For missing values in <code>rescale01()</code>, a reasonable decision is “they stay missing, and the rest are rescaled as usual”:</p>
+
+  <figure class="code r">
+    <figcaption><span>tests/testthat/test-clean.R</span></figcaption>
+<pre><code>test_that("rescale01() keeps missing values missing", {
+  expect_equal(rescale01(c(1, NA, 3)), c(0, NA, 1))
+})</code></pre>
+  </figure>
+
+  <p>This passes already. That is a fine outcome: the behaviour is now written down, and a future edit that drops <code>na.rm = TRUE</code> will be caught.</p>
+
+  <h2>A bug, caught test-first</h2>
+  <p>Now the second item on the list. What does <code>rescale01()</code> do with a column where every value is the same?</p>
+
+  <figure class="code r">
+    <figcaption><span>R</span></figcaption>
+<pre><code>rescale01(c(5, 5, 5))</code></pre>
+  </figure>
+  <figure class="code out fail">
+    <figcaption><span>Console</span></figcaption>
+<pre>[1] NaN NaN NaN</pre>
+  </figure>
+
+  <p>The range is zero, so the function divides zero by zero. One constant column would quietly fill a model matrix with <code>NaN</code>. That is a bug. The tempting move is to fix it straight away. Do this instead:</p>
+
+  <blockquote>Always write a test when you discover a bug.
+    <footer>Wickham &amp; Bryan, <a href="https://r-pkgs.org/testing-design.html"><em>R Packages</em> (2e), ch. 14</a></footer>
+  </blockquote>
+
+  <h3>Step 1: write the test and watch it fail</h3>
+  <p>Decide what should happen (all zeros is a sensible answer) and say so.</p>
+
+  <figure class="code r">
+    <figcaption><span>tests/testthat/test-clean.R</span></figcaption>
+<pre><code>test_that("rescale01() returns zeros when every value is the same", {
+  expect_equal(rescale01(c(5, 5, 5)), c(0, 0, 0))
+})</code></pre>
+  </figure>
+  <figure class="code out fail">
+    <figcaption><span>Console</span></figcaption>
+<pre>Failure ('test-clean.R:22:3'): rescale01() returns zeros when every value is the same
+Expected `rescale01(c(5, 5, 5))` to equal `c(0, 0, 0)`.
+Differences:
+  `actual`: NaN NaN NaN
+`expected`: 0.0 0.0 0.0</pre>
+  </figure>
+
+  <p>The failure matters. It proves that the test can see this bug. A test written after the fix passes the first time you run it, and you never find out whether it would have caught anything.</p>
+
+  <h3>Step 2: fix the function</h3>
+  <figure class="code r">
+    <figcaption><span>R/clean.R</span></figcaption>
+<pre><code>rescale01 &lt;- function(x) {
+  rng &lt;- range(x, na.rm = TRUE)
+  if (rng[1] == rng[2]) {
+    return(x - rng[1])   # every value is the same: all zeros, NAs kept
+  }
+  (x - rng[1]) / (rng[2] - rng[1])
+}</code></pre>
+  </figure>
+
+  <h3>Step 3: run everything again</h3>
+  <p>Run all the tests, not just the new one. The new test should pass, and so should every old one. The old ones are how you know the fix did not break something else.</p>
+  <span class="cite">This fail-first rhythm is often called “red, green”. <em>R Packages</em>: “When we start to fix a bug, we first like to convert it into a (failing) test.” <a href="https://r-pkgs.org/testing-basics.html">ch. 13</a>.</span>
+
+  <h2>Expecting an error</h2>
+  <p>For the wrong type, the right behaviour is to stop with a clear message. <code>expect_error()</code> passes when the code throws an error and fails when it does not.</p>
+
+  <figure class="code r">
+    <figcaption><span>R</span></figcaption>
+<pre><code>expect_error(rescale01("a"))</code></pre>
+  </figure>
+
+  <p>This passes with the function as it stands, which looks like good news. It is not, quite. Look at what the next line does, with the function name mistyped:</p>
+
+  <figure class="code r">
+    <figcaption><span>R</span></figcaption>
+<pre><code>expect_error(rescale1("a"))   # typo: there is no function rescale1()</code></pre>
+  </figure>
+
+  <div class="box trap">
+    <span class="label">Common trap</span>
+    <p>That also passes. <code>could not find function "rescale1"</code> is an error, and a bare <code>expect_error()</code> is satisfied by <em>any</em> error at all. A test like this can stay green for years while testing nothing.</p>
+  </div>
+
+  <p>Give <code>expect_error()</code> a second argument: a piece of text (a regular expression) that the error message must match.</p>
+
+  <figure class="code r">
+    <figcaption><span>tests/testthat/test-clean.R</span></figcaption>
+<pre><code>test_that("rescale01() rejects input that is not numeric", {
+  expect_error(rescale01("a"), "must be numeric")
+})</code></pre>
+  </figure>
+  <figure class="code out fail">
+    <figcaption><span>Console (first lines)</span></figcaption>
+<pre>Error ('test-clean.R:26:3'): rescale01() rejects input that is not numeric
+Error in `x - rng[1]`: non-numeric argument to binary operator</pre>
+  </figure>
+  <span class="cite"><code>regexp</code>: “A character vector giving a regular expression that must match the error message.” <a href="https://testthat.r-lib.org/reference/expect_error.html"><code>expect_error()</code> reference</a>. When an error has a class of its own, <em>R Packages</em> prefers matching on the class; plain <code>stop()</code> errors do not, so we match the message.</span>
+
+  <p>Now the test shows what a user of the function would see: an error, but a cryptic one from deep inside the arithmetic. The test is red, so improve the function by checking the input at the top:</p>
+
+  <figure class="code r">
+    <figcaption><span>R/clean.R</span></figcaption>
+<pre><code>rescale01 &lt;- function(x) {
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.", call. = FALSE)
+  }
+  rng &lt;- range(x, na.rm = TRUE)
+  if (rng[1] == rng[2]) {
+    return(x - rng[1])
+  }
+  (x - rng[1]) / (rng[2] - rng[1])
+}</code></pre>
+  </figure>
+
+  <p>Run the tests again and everything passes. The same failing-test-first rhythm fixed a bug a moment ago and has now added a feature.</p>
+
+  <h2>Warnings</h2>
+  <p><code>parse_money("n/a")</code> returns <code>NA</code> with R's warning “NAs introduced by coercion”. If that is the behaviour you want, say so with <code>expect_warning()</code>. To state that well-formed input is quiet, use <code>expect_no_warning()</code>.</p>
+
+  <figure class="code r">
+    <figcaption><span>tests/testthat/test-clean.R</span></figcaption>
+<pre><code>test_that("parse_money() warns when a value cannot be parsed", {
+  expect_warning(parse_money("n/a"), "NAs introduced")
+  expect_no_warning(parse_money("$5"))
+})</code></pre>
+  </figure>
+
+  <p>A warning that no expectation asked for does not fail the test, but it is not hidden either: it is counted in the <strong>W</strong> column and in <code>WARN</code> on the summary line. Treat a nonzero <code>WARN</code> as something to investigate.</p>
+  <span class="cite"><a href="https://testthat.r-lib.org/reference/expect_no_error.html"><code>expect_no_warning()</code> and friends</a> “assert the absence of an error, warning, or message”.</span>
+
+  <h2>One behaviour per test</h2>
+  <p>Your test file now has several short tests for <code>rescale01()</code> rather than one long one. Keep it that way. When the constant-column test fails, its description tells you what broke before you read a line of code.</p>
+  <span class="cite">“Strive to test each behaviour in one and only one test.” <a href="https://r-pkgs.org/testing-design.html"><em>R Packages</em> (2e), ch. 14</a>.</span>
+
+  <h2>Try it</h2>
+  <ol class="steps">
+    <li>Starting from your Lesson 3 project, work through this page in order: add each test, see it fail where the page says it fails, and make the two changes to <code>rescale01()</code>. Finish with every expectation passing. You can compare with the <a href="https://github.com/acatlin/r-unit-testing/tree/main/examples/cleaning-project">finished project</a> (17 expectations).</li>
+    <li>What should <code>rescale01(7)</code>, a single value, return? Decide, write the test, and run it.</li>
+    <li>What does <code>clean_names()</code> do with <code>""</code> or with <code>"123 Go!"</code>? Try them in the console, decide whether you are happy with the result, and write a test that records your decision.</li>
+  </ol>
+
+  <h2>Check yourself</h2>
+  <section class="quiz" data-quiz="lesson-4" aria-label="Lesson 4 quiz">
+    <ol class="questions">
+      <li class="q">
+        <p class="stem">A test contains <code>expect_error(rescale1("a"))</code>, where the function name is a typo. What happens when it runs?</p>
+        <ul class="opts">
+          <li data-correct>It passes, since any error satisfies it.</li>
+          <li>It fails, since the function is missing.</li>
+          <li>It is skipped, since nothing was called.</li>
+          <li>It warns, since the name looks wrong.</li>
+        </ul>
+        <p class="why">“Could not find function” is itself an error, and <code>expect_error()</code> with one argument accepts any error.</p>
+      </li>
+      <li class="q">
+        <p class="stem">How do you make sure <code>expect_error()</code> saw the error you intended?</p>
+        <ul class="opts">
+          <li data-correct>Supply text that the message must match.</li>
+          <li>Wrap the call inside another <code>test_that()</code> block.</li>
+          <li>Call the function twice in one expectation.</li>
+          <li>Use <code>expect_true()</code> around the same call instead.</li>
+        </ul>
+        <p class="why">The second argument is a regular expression matched against the error message, as in <code>expect_error(rescale01("a"), "must be numeric")</code>.</p>
+      </li>
+      <li class="q">
+        <p class="stem">You discover that <code>rescale01(c(5, 5, 5))</code> returns <code>NaN</code>. What is the best first move?</p>
+        <ul class="opts">
+          <li data-correct>Write a new test that reproduces it.</li>
+          <li>Fix the function before you forget how.</li>
+          <li>Delete the tests that still pass now.</li>
+          <li>Note it in a comment for later.</li>
+        </ul>
+        <p class="why">A test that fails first proves it can detect the bug, and stays behind to stop the bug returning.</p>
+      </li>
+      <li class="q">
+        <p class="stem">Which set of inputs covers the usual edge cases for a numeric helper?</p>
+        <ul class="opts">
+          <li data-correct>Missing values, identical values, and wrong types.</li>
+          <li>Three ordinary numeric vectors of different lengths.</li>
+          <li>The same typical vector, run three times.</li>
+          <li>Whatever values appeared in the last dataset.</li>
+        </ul>
+        <p class="why">Edge cases sit at the boundaries of what the function was written for. More ordinary input mostly re-tests the happy path.</p>
+      </li>
+      <li class="q">
+        <p class="stem">A test calls <code>parse_money("n/a")</code> without using <code>expect_warning()</code>. What does the run report?</p>
+        <ul class="opts">
+          <li data-correct>A warning, counted in the WARN column.</li>
+          <li>A failure, counted in the FAIL column.</li>
+          <li>A skip, counted in the SKIP column.</li>
+          <li>Nothing, since testthat ignores all R warnings.</li>
+        </ul>
+        <p class="why">Unexpected warnings are reported and counted, but they do not make the test fail.</p>
+      </li>
+    </ol>
+  </section>
+
+  <div class="box source">
+    <span class="label">Read next (primary source)</span>
+    <p><a href="https://r-pkgs.org/testing-design.html"><em>R Packages</em> (2e), chapter 14, “Designing your test suite”</a>, section 14.1, “What to test”. It is short and it is where the advice on this page comes from.</p>
+  </div>
+
+  <div class="box ask">
+    <span class="label">Stuck or curious?</span>
+    <p>Ask. “What should this function do with an empty vector?” often has no single right answer, which makes it a good thing to argue about with your instructor, a classmate, or an AI assistant.</p>
+  </div>
+
+  <nav class="pager" aria-label="Lesson">
+    <a href="0003-choosing-expectations.html">← Lesson 3: Choosing the right expectation</a>
+    <a class="next" href="0005-from-project-to-package.html">Lesson 5: From project to package →</a>
+  </nav>
+  <p class="colophon">Keep handy: <a href="../reference/cheat-sheet.html">cheat sheet</a> · <a href="../reference/glossary.html">glossary</a>. Output on this page is from R 4.5.3 with testthat 3.3.2; line numbers in reports depend on where you put each test.</p>
+</main>
+</body>
+</html>

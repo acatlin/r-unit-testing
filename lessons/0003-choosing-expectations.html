@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 3: Choosing the right expectation · Unit Testing in R</title>
+<link rel="stylesheet" href="../assets/course.css">
+<script src="../assets/course.js" defer></script>
+</head>
+<body>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html">Unit Testing in R</a>
+  <nav aria-label="Course">
+    <a href="0001-first-expectation.html">1 Expectations</a>
+    <a href="0002-test-that-and-test-files.html">2 Test files</a>
+    <a href="0003-choosing-expectations.html" aria-current="page">3 Toolkit</a>
+    <a href="0004-edge-cases-errors-and-bugs.html">4 Edge cases</a>
+    <a href="0005-from-project-to-package.html">5 Packages</a>
+    <a href="../reference/cheat-sheet.html">Cheat sheet</a>
+    <a href="../reference/glossary.html">Glossary</a>
+  </nav>
+</div></header>
+
+<main class="page">
+  <p class="eyebrow">Lesson 3 of 5 · about 25 minutes</p>
+  <h1>Choosing the right expectation</h1>
+  <p class="lede">So far every check has been <code>expect_equal()</code>. testthat has a few dozen expectations, and you need about ten of them. Picking the specific one gets you a failure message that tells you what went wrong.</p>
+
+  <div class="win">
+    <span class="label">By the end you can</span>
+    <p>Test a function that returns a data frame: its values, its column names and its type, each with the expectation built for the job.</p>
+  </div>
+
+  <h2>From last time</h2>
+  <section class="quiz" aria-label="Warm-up">
+    <ol class="questions">
+      <li class="q">
+        <p class="stem">How does testthat recognise a test file inside <code>tests/testthat/</code>?</p>
+        <ul class="opts">
+          <li data-correct>Its name starts with <code>test-</code>.</li>
+          <li>Its name ends with <code>-test</code>.</li>
+          <li>It contains a <code>test_that()</code> call.</li>
+          <li>It sits next to <code>run-tests.R</code>.</li>
+        </ul>
+        <p class="why">Only the file name counts: <code>test-</code> at the start and <code>.R</code> at the end.</p>
+      </li>
+      <li class="q">
+        <p class="stem">Which ordering runs from the smallest unit to the largest?</p>
+        <ul class="opts">
+          <li data-correct>Expectation, test, file.</li>
+          <li>Test, expectation, file.</li>
+          <li>File, test, expectation.</li>
+          <li>Expectation, file, test.</li>
+        </ul>
+        <p class="why">Expectations are grouped into tests, and tests are organised in files.</p>
+      </li>
+    </ol>
+  </section>
+
+  <h2>Why not <code>expect_true()</code> for everything?</h2>
+  <p>You could write any check as a logical condition wrapped in <code>expect_true()</code>. Compare what each version tells you when the check fails. Both tests below wrongly claim that <code>rescale01(1:3)</code> has four elements.</p>
+
+  <figure class="code r">
+    <figcaption><span>R</span></figcaption>
+<pre><code>x &lt;- rescale01(1:3)
+
+expect_true(length(x) == 4)   # vague
+expect_length(x, 4)           # specific</code></pre>
+  </figure>
+  <figure class="code out fail">
+    <figcaption><span>Failure from expect_true()</span></figcaption>
+<pre>Expected `length(x) == 4` to be TRUE.
+Differences:
+`actual`:   FALSE
+`expected`: TRUE</pre>
+  </figure>
+  <figure class="code out fail">
+    <figcaption><span>Failure from expect_length()</span></figcaption>
+<pre>Expected `x` to have length 4.
+Actual length: 3.</pre>
+  </figure>
+
+  <p>The first says only that something was not true. The second tells you the length was 3, which is what you need to start fixing it. The testthat documentation calls <code>expect_true()</code> and <code>expect_false()</code> “fall-back expectations that you can use when none of the other more specific expectations apply.”</p>
+  <span class="cite"><a href="https://testthat.r-lib.org/reference/logical-expectations.html">testthat reference, logical expectations</a>: “The disadvantage is that you may get a less informative error message.”</span>
+
+  <h2>The working set</h2>
+  <p>These cover most of what a data scientist tests. All of them are on the <a href="../reference/cheat-sheet.html">cheat sheet</a>.</p>
+
+  <div class="table-wrap wide">
+  <table>
+    <thead><tr><th>You want to check</th><th>Use</th><th>Example that passes</th></tr></thead>
+    <tbody>
+      <tr><td>The value, allowing floating-point noise</td><td><code>expect_equal()</code></td><td><code>expect_equal(parse_money("$5"), 5)</code></td></tr>
+      <tr><td>The value and type, exactly</td><td><code>expect_identical()</code></td><td><code>expect_identical(clean_names("A B"), "a_b")</code></td></tr>
+      <tr><td>How many elements</td><td><code>expect_length()</code></td><td><code>expect_length(rescale01(1:3), 3)</code></td></tr>
+      <tr><td>The base type</td><td><code>expect_type()</code></td><td><code>expect_type(rescale01(1:3), "double")</code></td></tr>
+      <tr><td>The class (tibble, data frame, model…)</td><td><code>expect_s3_class()</code></td><td><code>expect_s3_class(out, "tbl_df")</code></td></tr>
+      <tr><td>Names of a vector or columns</td><td><code>expect_named()</code></td><td><code>expect_named(out, c("dept", "n", "mean"))</code></td></tr>
+      <tr><td>Same values, any order</td><td><code>expect_setequal()</code></td><td><code>expect_setequal(out$dept, c("b", "a"))</code></td></tr>
+      <tr><td>Text matches a pattern</td><td><code>expect_match()</code></td><td><code>expect_match(clean_names("A B"), "^[a-z_]+$")</code></td></tr>
+      <tr><td>A number is below or above a bound</td><td><code>expect_lt()</code> <code>expect_lte()</code> <code>expect_gt()</code> <code>expect_gte()</code></td><td><code>expect_lte(max(rescale01(1:3)), 1)</code></td></tr>
+      <tr><td>Anything else that is true or false</td><td><code>expect_true()</code> <code>expect_false()</code></td><td><code>expect_false(anyNA(rescale01(1:3)))</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite">Full list: <a href="https://testthat.r-lib.org/reference/index.html">testthat function reference</a>. In these rows <code>out</code> is the tibble returned by <code>summarise_by()</code>, below.</span>
+
+  <h2>Testing a function that returns a data frame</h2>
+  <p>Most of your functions take a data frame and return one. Here is a small dplyr wrapper from <code>R/clean.R</code> that counts rows and averages a column within groups.</p>
+
+  <figure class="code r">
+    <figcaption><span>R/clean.R</span></figcaption>
+<pre><code>summarise_by &lt;- function(data, group, value) {
+  data |>
+    dplyr::group_by({{ group }}) |>
+    dplyr::summarise(
+      n = dplyr::n(),
+      mean = mean({{ value }}, na.rm = TRUE),
+      .groups = "drop"
+    )
+}</code></pre>
+  </figure>
+
+  <p>The recipe has three parts, and it works for nearly any data-frame function. <strong>Arrange</strong> a tiny input by hand. <strong>Act</strong> by calling the function. <strong>Assert</strong> by comparing with an expected result that you also typed by hand.</p>
+
+  <figure class="code r">
+    <figcaption><span>tests/testthat/test-clean.R</span></figcaption>
+<pre><code>test_that("summarise_by() counts rows and averages within each group", {
+  staff &lt;- tibble::tibble(
+    dept = c("a", "a", "b"),
+    pay  = c(10, 20, 60)
+  )
+  expected &lt;- tibble::tibble(
+    dept = c("a", "b"),
+    n    = c(2L, 1L),
+    mean = c(15, 60)
+  )
+  expect_equal(summarise_by(staff, dept, pay), expected)
+})</code></pre>
+  </figure>
+
+  <p>Three rows are enough. You can check the answer in your head (two people in “a” averaging 15, one in “b” at 60), and if the test fails the difference is small enough to read. Had you typed the mean for “b” as 50, the report would be:</p>
+
+  <figure class="code out fail">
+    <figcaption><span>Console</span></figcaption>
+<pre>Failure ('test-clean.R:24:3'): summarise_by() counts rows and averages within each group
+Expected `summarise_by(staff, dept, pay)` to equal `expected`.
+Differences:
+actual vs expected
+                mean
+  actual[1, ]     15
+- actual[2, ]     60
++ expected[2, ]   50
+
+  `actual$mean`: 15.0 60.0
+`expected$mean`: 15.0 50.0</pre>
+  </figure>
+
+  <p>testthat points at the column (<code>mean</code>) and the row (2) that disagree, which is why it pays to compare whole tibbles with <code>expect_equal()</code> when they are small.</p>
+
+  <div class="box trap">
+    <span class="label">Common trap</span>
+    <p>Never build the expected value by calling the function you are testing. <code>expect_equal(summarise_by(staff, dept, pay), summarise_by(staff, dept, pay))</code> passes no matter how broken the function is. The expected side must come from somewhere else: your own arithmetic.</p>
+  </div>
+
+  <h2>Structure checks</h2>
+  <p>Sometimes you care less about exact values and more about the <em>shape</em> of the result: it is a tibble, and it has the documented columns. Those get a test of their own.</p>
+
+  <figure class="code r">
+    <figcaption><span>tests/testthat/test-clean.R</span></figcaption>
+<pre><code>test_that("summarise_by() returns a tibble with the documented columns", {
+  staff &lt;- tibble::tibble(dept = c("a", "a", "b"), pay = c(10, 20, 60))
+  out &lt;- summarise_by(staff, dept, pay)
+  expect_s3_class(out, "tbl_df")
+  expect_named(out, c("dept", "n", "mean"))
+})</code></pre>
+  </figure>
+
+  <p>Notice that <code>staff</code> is built again inside this test. Each test makes everything it needs, so you can read, run or move it without looking anywhere else.</p>
+  <span class="cite">“A test should ideally be self-sufficient and self-contained.” <a href="https://r-pkgs.org/testing-design.html"><em>R Packages</em> (2e), ch. 14, “Designing your test suite”</a>.</span>
+
+  <h2>Try it</h2>
+  <ol class="steps">
+    <li>Add both <code>summarise_by()</code> tests to your <code>test-clean.R</code> and run <code>source("run-tests.R")</code>. You need the tibble package installed.</li>
+    <li>In the expected tibble, change <code>n = c(2L, 1L)</code> to <code>n = c(2, 1)</code> (doubles instead of integers). Does <code>expect_equal()</code> still pass? Now swap in <code>expect_identical()</code> and read the message.</li>
+    <li>Write a new test for <code>rescale01()</code> with three expectations: the result is of type <code>"double"</code>, has the same length as the input, and its largest value is at most 1.</li>
+  </ol>
+
+  <h2>Check yourself</h2>
+  <section class="quiz" data-quiz="lesson-3" aria-label="Lesson 3 quiz">
+    <ol class="questions">
+      <li class="q">
+        <p class="stem">Why prefer <code>expect_length(x, 3)</code> to <code>expect_true(length(x) == 3)</code>?</p>
+        <ul class="opts">
+          <li data-correct>Its failure message shows the real length.</li>
+          <li>It runs faster on very long vectors.</li>
+          <li>It additionally checks the type of x.</li>
+          <li>It is the only form testthat accepts.</li>
+        </ul>
+        <p class="why">Both work. The specific expectation tells you what the length actually was; <code>expect_true()</code> can only say “not TRUE”.</p>
+      </li>
+      <li class="q">
+        <p class="stem">A function returns integer counts. Your hand-typed expected tibble has <code>n = c(2, 1)</code>, which are doubles. What happens?</p>
+        <ul class="opts">
+          <li data-correct><code>expect_equal()</code> passes but <code>expect_identical()</code> fails.</li>
+          <li><code>expect_equal()</code> fails but <code>expect_identical()</code> passes.</li>
+          <li><code>expect_equal()</code> and <code>expect_identical()</code> both pass.</li>
+          <li><code>expect_equal()</code> and <code>expect_identical()</code> both fail.</li>
+        </ul>
+        <p class="why"><code>expect_equal()</code> treats 2 and 2L as equal. <code>expect_identical()</code> also compares types, and reports that one column is integer and the other double.</p>
+      </li>
+      <li class="q">
+        <p class="stem">You want to check that a result has exactly the columns <code>dept</code>, <code>n</code> and <code>mean</code>. Which expectation is the most direct?</p>
+        <ul class="opts">
+          <li data-correct><code>expect_named()</code></li>
+          <li><code>expect_length()</code></li>
+          <li><code>expect_type()</code></li>
+          <li><code>expect_match()</code></li>
+        </ul>
+        <p class="why"><code>expect_named(out, c("dept", "n", "mean"))</code>. <code>expect_length()</code> would confirm there are three columns but not which ones.</p>
+      </li>
+      <li class="q">
+        <p class="stem">What does <code>expect_type(rescale01(1:3), "integer")</code> do?</p>
+        <ul class="opts">
+          <li data-correct>Fails, because division returns a double.</li>
+          <li>Passes, because the input was integer.</li>
+          <li>Fails, because types cannot be tested.</li>
+          <li>Passes, because doubles count as integers.</li>
+        </ul>
+        <p class="why"><code>rescale01()</code> divides, and division in R always gives a double. The message reads: <code>Expected `rescale01(1:3)` to have type "integer". Actual type: "double"</code>.</p>
+      </li>
+      <li class="q">
+        <p class="stem">Where should the expected value in a <code>summarise_by()</code> test come from?</p>
+        <ul class="opts">
+          <li data-correct>A small expected tibble typed by hand.</li>
+          <li>One more call to the same function.</li>
+          <li>A random sample of the production data.</li>
+          <li>The full dataset with thousands of rows.</li>
+        </ul>
+        <p class="why">The expected value has to be independent of the code under test and small enough to verify by eye.</p>
+      </li>
+    </ol>
+  </section>
+
+  <div class="box source">
+    <span class="label">Read next (primary source)</span>
+    <p><a href="https://r-pkgs.org/testing-basics.html"><em>R Packages</em> (2e), chapter 13, section “Expectations”</a>, then skim the “Expectations” headings of the <a href="https://testthat.r-lib.org/reference/index.html">testthat function reference</a> so you know what exists.</p>
+  </div>
+
+  <div class="box ask">
+    <span class="label">Stuck or curious?</span>
+    <p>Ask. “Which expectation should I use to check <em>this</em>?” is a good question for your instructor, a classmate, or an AI assistant. Show the function and say in words what you want to be true.</p>
+  </div>
+
+  <nav class="pager" aria-label="Lesson">
+    <a href="0002-test-that-and-test-files.html">← Lesson 2: <code>test_that()</code> and test files</a>
+    <a class="next" href="0004-edge-cases-errors-and-bugs.html">Lesson 4: Edge cases, errors and bugs →</a>
+  </nav>
+  <p class="colophon">Keep handy: <a href="../reference/cheat-sheet.html">cheat sheet</a> · <a href="../reference/glossary.html">glossary</a>. Output on this page is from R 4.5.3 with testthat 3.3.2, in test files that begin with <code>local_edition(3)</code>.</p>
+</main>
+</body>
+</html>

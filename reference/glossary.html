@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glossary · Unit Testing in R</title>
+<link rel="stylesheet" href="../assets/course.css">
+<script src="../assets/course.js" defer></script>
+</head>
+<body>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html">Unit Testing in R</a>
+  <nav aria-label="Course">
+    <a href="../lessons/0001-first-expectation.html">1 Expectations</a>
+    <a href="../lessons/0002-test-that-and-test-files.html">2 Test files</a>
+    <a href="../lessons/0003-choosing-expectations.html">3 Toolkit</a>
+    <a href="../lessons/0004-edge-cases-errors-and-bugs.html">4 Edge cases</a>
+    <a href="../lessons/0005-from-project-to-package.html">5 Packages</a>
+    <a href="cheat-sheet.html">Cheat sheet</a>
+    <a href="glossary.html" aria-current="page">Glossary</a>
+  </nav>
+</div></header>
+
+<main class="page">
+  <p class="eyebrow">Reference</p>
+  <h1>Glossary</h1>
+  <p class="lede">The course's vocabulary. Each term is used in exactly this sense on every page.</p>
+
+  <dl class="glossary">
+    <dt id="actual">Actual</dt>
+    <dd>What your code really returned. The first argument of most expectations. <span class="where">Lesson 1</span></dd>
+
+    <dt id="description">Description</dt>
+    <dd>The first argument of <code>test_that()</code>: a sentence saying what the code should do. It is printed when the test fails. <span class="where">Lesson 2</span></dd>
+
+    <dt id="description-file"><code>DESCRIPTION</code></dt>
+    <dd>The settings file at the top of a package. It lists the packages yours depends on and sets the testthat edition. <span class="where">Lesson 5</span></dd>
+
+    <dt id="edge-case">Edge case</dt>
+    <dd>An input at the boundary of what a function was written for: missing values, an empty vector, a constant column, the wrong type. <span class="where">Lesson 4</span></dd>
+
+    <dt id="edition">Edition</dt>
+    <dd>A version of testthat's behaviour. The third edition is current. A plain project selects it with <code>local_edition(3)</code> at the top of each test file; a package selects it in <code>DESCRIPTION</code>. <span class="where">Lessons 2, 5</span></dd>
+
+    <dt id="expectation">Expectation</dt>
+    <dd>A single check: a call to a function whose name starts with <code>expect_</code>. It is silent when it passes and reports a failure when it does not. <span class="where">Lesson 1</span></dd>
+
+    <dt id="expected">Expected</dt>
+    <dd>What the code should return, worked out by you and typed into the test. The second argument of most expectations. <span class="where">Lesson 1</span></dd>
+
+    <dt id="failure">Failure</dt>
+    <dd>An expectation whose actual and expected values disagree. Either the code or the test is wrong; the report helps you decide which. Counted under <code>FAIL</code>. <span class="where">Lessons 1, 2</span></dd>
+
+    <dt id="happy-path">Happy path</dt>
+    <dd>Ordinary, well-formed input producing an ordinary result. The first thing to test, never the only thing. <span class="where">Lesson 4</span></dd>
+
+    <dt id="package">Package</dt>
+    <dd>R's standard way to bundle functions, their tests and their settings in one folder with a fixed layout. <span class="where">Lesson 5</span></dd>
+
+    <dt id="regular-expression">Regular expression</dt>
+    <dd>A text pattern. <code>expect_error()</code>, <code>expect_warning()</code> and <code>expect_match()</code> take one and check that a message or string matches it. A plain phrase such as <code>"must be numeric"</code> is the simplest kind. <span class="where">Lessons 3, 4</span></dd>
+
+    <dt id="test">Test</dt>
+    <dd>One call to <code>test_that()</code>: a description plus one or more expectations about a single behaviour. <span class="where">Lesson 2</span></dd>
+
+    <dt id="test-file">Test file</dt>
+    <dd>An R script in <code>tests/testthat/</code> whose name starts with <code>test-</code>. It holds the tests for one file of functions. <span class="where">Lesson 2</span></dd>
+
+    <dt id="testthat">testthat</dt>
+    <dd>The R package this course uses for unit testing. <span class="where">Lesson 1</span></dd>
+
+    <dt id="tolerance">Tolerance</dt>
+    <dd>The small numeric difference that <code>expect_equal()</code> ignores, so that floating-point noise does not cause failures. <code>expect_identical()</code> has none. <span class="where">Lesson 1</span></dd>
+
+    <dt id="unit-test">Unit test</dt>
+    <dd>A check, written as code, that one small piece of a program (usually one function) behaves as intended. <span class="where">Lesson 1</span></dd>
+  </dl>
+
+  <p class="colophon">Definitions follow the usage in <a href="https://r-pkgs.org/testing-basics.html"><em>R Packages</em> (2e)</a> and the <a href="https://testthat.r-lib.org/">testthat documentation</a>. See also the <a href="cheat-sheet.html">cheat sheet</a>.</p>
+</main>
+</body>
+</html>
