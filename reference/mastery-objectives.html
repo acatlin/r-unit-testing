@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mastery objectives · Unit Testing in R</title>
+<link rel="stylesheet" href="../assets/course.css">
+<script src="../assets/course.js" defer></script>
+</head>
+<body>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="../index.html">Unit Testing in R</a>
+  <nav aria-label="Course">
+    <a href="../lessons/0001-first-expectation.html">1 Expectations</a>
+    <a href="../lessons/0002-test-that-and-test-files.html">2 Test files</a>
+    <a href="../lessons/0003-choosing-expectations.html">3 Toolkit</a>
+    <a href="../lessons/0004-edge-cases-errors-and-bugs.html">4 Edge cases</a>
+    <a href="../lessons/0005-from-project-to-package.html">5 Packages</a>
+    <a href="cheat-sheet.html">Cheat sheet</a>
+    <a href="glossary.html">Glossary</a>
+    <a href="mastery-objectives.html" aria-current="page">Objectives</a>
+  </nav>
+</div></header>
+
+<main class="page">
+  <p class="eyebrow">Reference · what you can do after each lesson</p>
+  <h1>Mastery objectives</h1>
+  <p class="lede">Each line below is something you can do once you have mastered a lesson. If you can do it without looking at the lesson page, tick it off. If you cannot, the table says where to practise.</p>
+
+  <h2>How to read the tables</h2>
+  <p>Every objective has two kinds of evidence. <strong>Doing</strong> is a “Try it” step, where you write or run code yourself. <strong>Recognition</strong> is a multiple-choice question, where you pick the right answer from four. Doing is the stronger evidence: an objective is mastered when you can do it, not when you can spot it.</p>
+  <ul>
+    <li><code>L4-T2</code> is Lesson 4, “Try it” step 2.</li>
+    <li><code>L3-Q2</code> is Lesson 3, “Check yourself” question 2.</li>
+    <li><code>L2-W1</code> is Lesson 2, warm-up question 1 (the “From last time” quiz).</li>
+  </ul>
+  <p>Words such as <a href="glossary.html#expectation">expectation</a>, <a href="glossary.html#test">test</a> and <a href="glossary.html#edge-case">edge case</a> are defined in the <a href="glossary.html">glossary</a>.</p>
+
+  <h2>Lesson 1: Your first expectation</h2>
+  <div class="table-wrap wide">
+  <table>
+    <thead><tr><th></th><th>You can…</th><th>Doing</th><th>Recognition</th></tr></thead>
+    <tbody>
+      <tr><td>1.1</td><td>Write an <code>expect_equal()</code> call that passes, with the function call first and an expected value you worked out yourself second.</td><td>L1-T2, L1-T3</td><td>L1-Q2</td></tr>
+      <tr><td>1.2</td><td>Tell a pass from a failure at the console and, from a failure message, say which element disagrees and whether the function or the expected value is wrong.</td><td>L1-T3, L1-T4</td><td>L1-Q1, L2-W1</td></tr>
+      <tr><td>1.3</td><td>Choose between <code>expect_equal()</code> and <code>expect_identical()</code> and predict which one passes, for floating-point noise and for integer versus double.</td><td>L3-T2</td><td>L1-Q3, L2-W2, L3-Q2</td></tr>
+      <tr><td>1.4</td><td>Explain what a written test gives you that a look at console output does not, and what it does not guarantee.</td><td></td><td>L1-Q4</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Taught in <a href="../lessons/0001-first-expectation.html">Lesson 1</a>; objective 1.3 is finished in <a href="../lessons/0003-choosing-expectations.html">Lesson 3</a>.</p>
+
+  <h2>Lesson 2: <code>test_that()</code> and test files</h2>
+  <div class="table-wrap wide">
+  <table>
+    <thead><tr><th></th><th>You can…</th><th>Doing</th><th>Recognition</th></tr></thead>
+    <tbody>
+      <tr><td>2.1</td><td>Write a <code>test_that()</code> block about one behaviour, with a description that says what the function should do.</td><td>L3-T3, L4-T2, L4-T3</td><td>L2-Q1</td></tr>
+      <tr><td>2.2</td><td>Lay out a plain project with <code>R/</code> and <code>tests/testthat/</code>, and create a test file that testthat will find and that starts with <code>local_edition(3)</code>.</td><td>L2-T1, L2-T4</td><td>L2-Q2, L2-Q5, L3-W1, L3-W2</td></tr>
+      <tr><td>2.3</td><td>Run every test in a plain project with one command, and fix a run in which every test reports “could not find function”.</td><td>L2-T2</td><td>L2-Q3, L4-W2</td></tr>
+      <tr><td>2.4</td><td>Read a <code>test_dir()</code> report: say what the summary line counts and, for a failure, where it is, which test it belongs to, why it failed, and whether the code or the test is wrong.</td><td>L2-T3, L4-T1, L5-T2</td><td>L2-Q4</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Taught in <a href="../lessons/0002-test-that-and-test-files.html">Lesson 2</a>; “one behaviour per test” in objective 2.1 is from <a href="../lessons/0004-edge-cases-errors-and-bugs.html">Lesson 4</a>.</p>
+
+  <h2>Lesson 3: Choosing the right expectation</h2>
+  <div class="table-wrap wide">
+  <table>
+    <thead><tr><th></th><th>You can…</th><th>Doing</th><th>Recognition</th></tr></thead>
+    <tbody>
+      <tr><td>3.1</td><td>Pick the most specific expectation for a check instead of <code>expect_true()</code>, and say what the failure message gains.</td><td>L3-T3</td><td>L3-Q1, L3-Q3, L3-Q4, L4-W1</td></tr>
+      <tr><td>3.2</td><td>Test the values of a function that returns a data frame: build a tiny input by hand, call the function, and compare the result with an expected tibble you typed by hand.</td><td>L3-T1</td><td>L3-Q5</td></tr>
+      <tr><td>3.3</td><td>Test the structure of a result (its class and its column names) in a separate test that builds everything it needs.</td><td>L3-T1</td><td>L3-Q3, L4-W1</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Taught in <a href="../lessons/0003-choosing-expectations.html">Lesson 3</a>.</p>
+
+  <h2>Lesson 4: Edge cases, errors and bugs</h2>
+  <div class="table-wrap wide">
+  <table>
+    <thead><tr><th></th><th>You can…</th><th>Doing</th><th>Recognition</th></tr></thead>
+    <tbody>
+      <tr><td>4.1</td><td>For a function that takes a column, list the edge cases (missing values, all values the same, a single value, empty input, the wrong type), decide what should happen for each, and record each decision as a test.</td><td>L4-T1, L4-T2, L4-T3</td><td>L4-Q4</td></tr>
+      <tr><td>4.2</td><td>On finding a bug, write a test that fails, fix the function, and run every test again.</td><td>L4-T1, L5-T3</td><td>L4-Q3, L5-W2</td></tr>
+      <tr><td>4.3</td><td>Test that a function stops with a specific error by giving <code>expect_error()</code> a message pattern, and explain why a bare <code>expect_error()</code> can pass while testing nothing.</td><td>L4-T1</td><td>L4-Q1, L4-Q2, L5-W1</td></tr>
+      <tr><td>4.4</td><td>State with <code>expect_warning()</code> and <code>expect_no_warning()</code> when a function should and should not warn, and treat a <code>WARN</code> count above zero as something to investigate.</td><td>L4-T1</td><td>L4-Q5</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Taught in <a href="../lessons/0004-edge-cases-errors-and-bugs.html">Lesson 4</a>.</p>
+
+  <h2>Lesson 5: From project to package</h2>
+  <div class="table-wrap wide">
+  <table>
+    <thead><tr><th></th><th>You can…</th><th>Doing</th><th>Recognition</th></tr></thead>
+    <tbody>
+      <tr><td>5.1</td><td>Turn a plain project into a package with <code>create_package()</code>, <code>use_r()</code>, <code>use_testthat(3)</code> and <code>use_test()</code>, and run every test with <code>devtools::test()</code>.</td><td>L5-T1</td><td>L5-Q2, L5-Q4</td></tr>
+      <tr><td>5.2</td><td>Say what the package does in place of <code>source()</code>, <code>local_edition(3)</code> and <code>run-tests.R</code>, and find the edition setting in <code>DESCRIPTION</code>.</td><td>L5-T1</td><td>L5-Q1, L5-Q3</td></tr>
+      <tr><td>5.3</td><td>Declare dependencies: call other packages as <code>package::function()</code> in <code>R/</code>, and put a package in Imports or in Suggests according to whether your functions need it or only your tests do.</td><td>L5-T1</td><td>L5-Q5</td></tr>
+      <tr><td>5.4</td><td>Work in the package loop (edit, <code>load_all()</code>, <code>test()</code>, now and then <code>check()</code>) and add a new function test-first with <code>use_r()</code> and <code>use_test()</code>.</td><td>L5-T2, L5-T3</td><td></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Taught in <a href="../lessons/0005-from-project-to-package.html">Lesson 5</a>.</p>
+
+  <h2>Coming next: not yet taught</h2>
+  <p>Lesson 5 ends by naming what the course takes up next. These objectives have no lesson yet. If you want to get ahead, each one points at the section of the official documentation that teaches it. All of them assume the package from Lesson 5.</p>
+
+  <h3>Snapshot tests</h3>
+  <div class="table-wrap wide">
+  <table>
+    <thead><tr><th></th><th>You can…</th><th>Recommended reading</th></tr></thead>
+    <tbody>
+      <tr><td>S1</td><td>Write an <code>expect_snapshot()</code> test for printed output or an error message that is awkward to type out, and find what it recorded under <code>tests/testthat/_snaps/</code>.</td><td><a href="https://r-pkgs.org/testing-basics.html#sec-snapshot-tests"><em>R Packages</em> 13.5.3, “Snapshot tests”</a></td></tr>
+      <tr><td>S2</td><td>When a snapshot test reports a change, review it and either fix the code or accept the new snapshot with <code>snapshot_review()</code> or <code>snapshot_accept()</code>.</td><td><a href="https://r-pkgs.org/testing-basics.html#sec-snapshot-tests"><em>R Packages</em> 13.5.3</a></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Fixtures and helper files</h3>
+  <div class="table-wrap wide">
+  <table>
+    <thead><tr><th></th><th>You can…</th><th>Recommended reading</th></tr></thead>
+    <tbody>
+      <tr><td>F1</td><td>Make a test clean up after itself with withr <code>local_*()</code> functions or <code>withr::defer()</code>, and write files only to a temporary location.</td><td><em>R Packages</em> <a href="https://r-pkgs.org/testing-design.html#sec-testing-design-self-contained">14.2.2</a>, <a href="https://r-pkgs.org/testing-design.html#sec-tests-files-where-write">14.3.7</a> and <a href="https://r-pkgs.org/testing-advanced.html#create-and-destroy-a-local-useful_thing">15.1.2</a></td></tr>
+      <tr><td>F2</td><td>Move set-up code that several tests repeat into a function in a <code>helper*.R</code> file, and say when testthat loads that file.</td><td><em>R Packages</em> <a href="https://r-pkgs.org/testing-design.html#testthat-helper-files">14.3.3</a> and <a href="https://r-pkgs.org/testing-advanced.html#sec-testing-advanced-fixture-helper">15.1.1</a></td></tr>
+      <tr><td>F3</td><td>Store a small test data file under <code>tests/testthat/</code> and read it in a test with <code>test_path()</code>.</td><td><em>R Packages</em> <a href="https://r-pkgs.org/testing-design.html#storing-test-data">14.3.6</a> and <a href="https://r-pkgs.org/testing-advanced.html#sec-testing-advanced-concrete-fixture">15.1.3</a></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Skipping tests</h3>
+  <div class="table-wrap wide">
+  <table>
+    <thead><tr><th></th><th>You can…</th><th>Recommended reading</th></tr></thead>
+    <tbody>
+      <tr><td>K1</td><td>Skip a test under a stated condition with <code>skip_if_not_installed()</code>, <code>skip_on_cran()</code>, <code>skip_on_os()</code> or <code>skip_if()</code>, and find the skip and its reason in the report.</td><td><a href="https://r-pkgs.org/testing-advanced.html#tests-skipping"><em>R Packages</em> 15.3.1, “Skipping a test”</a>; <a href="https://testthat.r-lib.org/reference/skip.html"><code>skip()</code> reference</a></td></tr>
+      <tr><td>K2</td><td>Explain why a skipped test is a risk, and check the <code>SKIP</code> count for skips you did not intend.</td><td><a href="https://r-pkgs.org/testing-advanced.html#tests-skipping"><em>R Packages</em> 15.3.1.3, “Dangers of skipping”</a></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Test coverage</h3>
+  <div class="table-wrap wide">
+  <table>
+    <thead><tr><th></th><th>You can…</th><th>Recommended reading</th></tr></thead>
+    <tbody>
+      <tr><td>C1</td><td>Measure a package's test coverage with <code>devtools::test_coverage()</code> or <code>covr::package_coverage()</code>, and use the report to find lines that no test runs.</td><td><a href="https://r-pkgs.org/testing-design.html#sec-testing-design-coverage"><em>R Packages</em> 14.1.1, “Test coverage”</a>; <a href="https://covr.r-lib.org/">covr</a> and its <a href="https://covr.r-lib.org/reference/report.html"><code>report()</code></a></td></tr>
+      <tr><td>C2</td><td>Use uncovered lines to choose the next test to write, and explain why 100% coverage is not required.</td><td><a href="https://r-pkgs.org/testing-design.html#sec-testing-design-coverage"><em>R Packages</em> 14.1.1</a></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Tests on GitHub Actions</h3>
+  <div class="table-wrap wide">
+  <table>
+    <thead><tr><th></th><th>You can…</th><th>Recommended reading</th></tr></thead>
+    <tbody>
+      <tr><td>G1</td><td>Add the <code>check-standard</code> workflow with <code>usethis::use_github_action()</code>, push, and say what the workflow runs, on which systems, and when.</td><td><a href="https://r-pkgs.org/software-development-practices.html#sec-sw-dev-practices-ci"><em>R Packages</em> 20.2, “Continuous integration”</a>; <a href="https://usethis.r-lib.org/reference/use_github_action.html"><code>use_github_action()</code> reference</a></td></tr>
+      <tr><td>G2</td><td>When a GitHub Actions run fails, find the failing test in the log, reproduce it on your own computer, fix it, and push until the run passes.</td><td><a href="https://r-pkgs.org/software-development-practices.html#r-cmd-check-via-gha"><em>R Packages</em> 20.2.2</a>; <a href="https://github.com/r-lib/actions">r-lib/actions</a> and its <a href="https://github.com/r-lib/actions/tree/v2-branch/examples">example workflows</a></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>Later</h2>
+  <p>Three more topics may follow and have no objectives yet: mocking, test-first development as a full method, and validating data (as opposed to functions) with packages such as pointblank or assertr.</p>
+
+  <p class="colophon">Reading pointers are to <a href="https://r-pkgs.org/"><em>R Packages</em> (2e)</a> by Hadley Wickham and Jennifer Bryan, <a href="https://covr.r-lib.org/">covr 4.0.0</a>, <a href="https://usethis.r-lib.org/">usethis 3.2.2</a> and <a href="https://github.com/r-lib/actions">r-lib/actions</a>, read on 2026-11-20. See also the <a href="cheat-sheet.html">cheat sheet</a> and the <a href="glossary.html">glossary</a>.</p>
+</main>
+</body>
+</html>

@@ -12,7 +12,7 @@ A short course that teaches first-semester graduate data science students to wri
 4. [Edge cases, errors and bugs](https://acatlin.github.io/r-unit-testing/lessons/0004-edge-cases-errors-and-bugs.html)
 5. [From project to package](https://acatlin.github.io/r-unit-testing/lessons/0005-from-project-to-package.html)
 
-Reference: [cheat sheet](https://acatlin.github.io/r-unit-testing/reference/cheat-sheet.html) · [glossary](https://acatlin.github.io/r-unit-testing/reference/glossary.html)
+Reference: [cheat sheet](https://acatlin.github.io/r-unit-testing/reference/cheat-sheet.html) · [glossary](https://acatlin.github.io/r-unit-testing/reference/glossary.html) · [mastery objectives](https://acatlin.github.io/r-unit-testing/reference/mastery-objectives.html)
 
 ## What is in this repository
 
@@ -20,7 +20,8 @@ Reference: [cheat sheet](https://acatlin.github.io/r-unit-testing/reference/chea
 |---|---|
 | `index.html` | Course home page |
 | `lessons/` | One HTML page per lesson, each with a quiz |
-| `reference/` | Printable cheat sheet and glossary |
+| `reference/` | Printable cheat sheet, glossary, and the student checklist of mastery objectives |
+| `OBJECTIVES.md` | Instructor view of the mastery objectives: the evidence for each one, the gaps, and the objectives for lessons not yet written |
 | `assets/` | Shared stylesheet and script (code colouring, quizzes) used by every page |
 | `examples/cleaning-project-starter/` | The project students begin with in Lesson 2 |
 | `examples/cleaning-project/` | The same project after Lesson 4 |

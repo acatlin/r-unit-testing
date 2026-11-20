@@ -19,6 +19,7 @@ The learner in this workspace is Andy's students, not Andy. Lessons speak to a f
 - All output shown is real. Capture with `reporter = "progress"` and strip spinner lines. Note the versions in the page colophon.
 - Example code lives in `examples/` and is run by `tools/run_examples.R` (also in CI).
 - New lessons: add to the nav in every page header, to `index.html`, and to the cheat sheet.
+- Mastery objectives live in two files with identical wording: `reference/mastery-objectives.html` (students) and `OBJECTIVES.md` (instructor: evidence map and gaps). Evidence ids are positional (`L3-Q2`, `L2-W1`, `L4-T3`), so adding, removing or reordering a "Try it" step or quiz question means updating both files. A new lesson moves its objectives from "not yet taught" into a lesson table.
 
 ## Ideas for the extension
 - Snapshot tests (`expect_snapshot()`) for printed output and error messages.
